@@ -221,7 +221,7 @@ export default function ScrollVideoHero() {
   }, []);
 
   return (
-    <section ref={wrapRef} id="top" className="relative h-[230vh]">
+    <section ref={wrapRef} id="top" className="relative h-[200vh] md:h-[230vh]">
       {/* sticky cinematic stage */}
       <div className="sticky top-0 h-screen w-full overflow-hidden">
         {/* clean gradient background behind the frame plane */}
@@ -238,34 +238,53 @@ export default function ScrollVideoHero() {
           style={{ opacity: textOpacity, y: textY, scale: textScale }}
           className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center [text-shadow:0_2px_30px_rgba(0,0,0,0.65)]"
         >
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.9 }}
-            className="eyebrow mb-6 text-gold-light"
-          >
-            {site.brand} · {site.tagline}
-          </motion.p>
+          {/* eyebrow — pops up from the bottom */}
+          <div className="mb-6 overflow-hidden pb-[0.12em]">
+            <motion.p
+              initial={{ y: "120%" }}
+              animate={{ y: 0 }}
+              transition={{ delay: 0.2, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              className="eyebrow text-gold-light"
+            >
+              {site.brand} · {site.tagline}
+            </motion.p>
+          </div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ delay: 0.55, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-            className="display max-w-5xl text-[12vw] leading-[0.92] sm:text-[8.5vw] lg:text-[6.4rem]"
-          >
-            <span className="text-chrome-grad">Luxury Upholstery</span>
-            <br />
-            <span className="text-gold-grad">Redefined</span>
-          </motion.h1>
+          {/* headline — each line rises from behind a clip mask (digitalists-style) */}
+          <h1 className="display max-w-5xl text-[12vw] leading-[0.95] sm:text-[8.5vw] lg:text-[6.4rem]">
+            <span className="block overflow-hidden pb-[0.14em]">
+              <motion.span
+                initial={{ y: "120%" }}
+                animate={{ y: 0 }}
+                transition={{ delay: 0.35, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+                className="block text-chrome-grad"
+              >
+                Luxury Upholstery
+              </motion.span>
+            </span>
+            <span className="block overflow-hidden pb-[0.14em]">
+              <motion.span
+                initial={{ y: "120%" }}
+                animate={{ y: 0 }}
+                transition={{ delay: 0.5, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+                className="block text-gold-grad"
+              >
+                Redefined
+              </motion.span>
+            </span>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 1 }}
-            className="mt-7 max-w-xl text-base text-cream/85 sm:text-lg"
-          >
-            Premium custom interiors crafted for comfort, elegance, and identity.
-          </motion.p>
+          {/* subtext — pops up from the bottom */}
+          <div className="mt-7 max-w-xl overflow-hidden pb-[0.12em]">
+            <motion.p
+              initial={{ y: "120%" }}
+              animate={{ y: 0 }}
+              transition={{ delay: 0.72, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              className="text-base text-cream/85 sm:text-lg"
+            >
+              Premium custom interiors crafted for comfort, elegance, and identity.
+            </motion.p>
+          </div>
 
           <motion.div
             initial={{ opacity: 0, y: 18 }}
