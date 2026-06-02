@@ -70,6 +70,8 @@ export default function ScrollVideoHero() {
         if (readyUntil >= 0 && !readyFlag) {
           readyFlag = true;
           setReady(true);
+          // recompute ScrollTrigger positions once the media is in
+          ScrollTrigger.refresh();
         }
       };
       images[i] = img;
@@ -268,6 +270,22 @@ export default function ScrollVideoHero() {
           start: "top top", // ← SCROLL START
           end: "+=55%",     // ← SCROLL END (longer = slower fade)
           scrub: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      // (3) HYDROFLOW PRODUCT FEEL — the car subtly scales down & lifts as you
+      //     scroll, so it reads as a product showcase (transform-only = smooth).
+      gsap.to(canvasRef.current, {
+        scale: mobile ? 0.97 : 0.92, // ← CAR SCALE on scroll (smaller = more shrink)
+        yPercent: mobile ? -2 : -5,  // ← CAR UPWARD MOVEMENT
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#top",
+          start: "top top",
+          end: "+=70%",
+          scrub: 1.2, // smoother lag
+          invalidateOnRefresh: true,
         },
       });
     }, wrapRef);
@@ -286,7 +304,10 @@ export default function ScrollVideoHero() {
         <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_50%_15%,#23252b_0%,#121318_45%,#08080a_100%)]" />
 
         {/* the car visual fills the full width (object-fit: cover via the shader) */}
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 h-full w-full transform-gpu will-change-transform [backface-visibility:hidden]"
+        />
 
         {/* OVERLAYS — readability only. Adjust opacities to taste:
             top/bottom gradient blends nav + scroll area; center scrim sits behind
@@ -298,7 +319,7 @@ export default function ScrollVideoHero() {
         {/* headline — GSAP reveals each `.hero-reveal` from the bottom */}
         <div
           ref={textRef}
-          className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center will-change-transform [text-shadow:0_2px_30px_rgba(0,0,0,0.65)]"
+          className="absolute inset-0 z-10 flex transform-gpu flex-col items-center justify-center px-6 text-center will-change-transform [text-shadow:0_2px_30px_rgba(0,0,0,0.65)]"
         >
           <p className="hero-reveal eyebrow mb-6 text-gold-light">
             {site.brand} · {site.tagline}

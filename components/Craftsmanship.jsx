@@ -26,8 +26,9 @@ const cards = [
 export default function Craftsmanship() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const imgY = useTransform(scrollYProgress, [0, 1], ["-8%", "8%"]);
-  const imgScale = useTransform(scrollYProgress, [0, 1], [1.15, 1]);
+  const imgY = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"]);
+  // keep upscale tiny so the (low-res) source photo stays as crisp as possible
+  const imgScale = useTransform(scrollYProgress, [0, 1], [1.06, 1]);
 
   return (
     <section id="craft" ref={ref} className="section relative z-10 bg-ink/40">
