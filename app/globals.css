@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* shimmer sweep (used by ShimmerButton + the logo shimmer-glow) */
+@keyframes shimmer2 {
+  0% { background-position: 0% 0%; }
+  100% { background-position: -200% 0%; }
+}
+
 :root {
   --font-display: "Sora", system-ui, sans-serif;
   --font-body: "Manrope", system-ui, sans-serif;

@@ -1,6 +1,7 @@
 "use client";
 
 import { site, whatsappLink } from "@/lib/site";
+import ShimmerLogo from "@/components/ShimmerLogo";
 
 export default function Footer() {
   return (
@@ -9,7 +10,7 @@ export default function Footer() {
         <div className="flex flex-col items-start justify-between gap-10 md:flex-row">
           <div className="max-w-sm">
             <div className="flex items-center gap-3">
-              <img src="/images/logo.png" alt={site.brand} className="h-12 w-12 object-contain" />
+              <ShimmerLogo className="h-12 w-12" />
               <div>
                 <p className="display text-lg text-cream">{site.brand}</p>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-gold/70">{site.tagline}</p>

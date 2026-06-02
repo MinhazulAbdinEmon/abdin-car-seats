@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { site, whatsappLink } from "@/lib/site";
 import WhatsAppGlowButton from "@/components/WhatsAppGlowButton";
+import ShimmerLogo from "@/components/ShimmerLogo";
 
 const links = [
   { label: "Craft", href: "#craft" },
@@ -43,7 +44,7 @@ export default function Nav() {
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 sm:px-8">
         <button onClick={() => go("#top")} className="flex items-center gap-3">
-          <img src="/images/logo.png" alt={site.brand} className="h-10 w-10 object-contain" />
+          <ShimmerLogo className="h-10 w-10" />
           <span className="hidden sm:block">
             <span className="display block text-sm tracking-wide text-cream">{site.brand}</span>
             <span className="block text-[10px] uppercase tracking-[0.3em] text-gold/70">

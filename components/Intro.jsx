@@ -120,25 +120,25 @@ export default function Intro() {
               c = mix(c, b, clamp(uFocus,0.0,1.0));
             }
 
-            // key out near-white background, respect any existing alpha
-            float white = smoothstep(0.82, 0.97, min(c.r, min(c.g, c.b)));
+            // trim any residual white halo, respect existing alpha
+            float white = smoothstep(0.90, 0.99, min(c.r, min(c.g, c.b)));
             float a = c.a * (1.0 - white);
 
             float lum = dot(c.rgb, vec3(0.299,0.587,0.114));
-            float warm = clamp((c.r - c.b) * 1.5, 0.0, 1.0);
-            float priority = max(lum, warm * 0.85); // gold/bright reveals first
+            float chroma = clamp(length(c.rgb - vec3(lum)) * 2.0, 0.0, 1.0);
+            float priority = max(lum, chroma * 0.85); // bright/coloured accents reveal first
 
             float field = uReveal * 1.6 - (1.0 - priority);
             float appear = smoothstep(0.0, 0.18, field);
 
             vec3 col = c.rgb;
-            // light streak sweeping across the letters
+            // light streak sweeping across the letters (cool platinum sheen)
             float streak = smoothstep(0.07, 0.0, abs(vUv.x - uSweep));
-            col += streak * (0.35 + priority) * vec3(1.0, 0.82, 0.45);
+            col += streak * (0.35 + priority) * vec3(0.82, 0.92, 1.0);
             // tiny reflection ripple over the curves
             float ripple = sin((vUv.x + vUv.y) * 18.0 - uTime * 2.0) * 0.5 + 0.5;
-            col += ripple * streak * 0.15 * vec3(1.0, 0.9, 0.7);
-            col *= 1.0 + warm * 0.3;
+            col += ripple * streak * 0.15 * vec3(0.8, 0.9, 1.0);
+            col *= 1.0 + chroma * 0.25;
 
             float alpha = appear * a * uOpacity;
             if(uReflect > 0.5){
