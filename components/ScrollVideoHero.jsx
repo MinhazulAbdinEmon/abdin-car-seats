@@ -141,9 +141,10 @@ export default function ScrollVideoHero() {
           float streak = smoothstep(0.0, 0.5, sin((vUv.x + vUv.y) * 3.1415 + uTime * 0.25)) * 0.03;
           col += streak * vec3(0.9, 0.8, 0.6);
 
-          // ── EDGE VIGNETTE — lower the 2nd number (0.8) to darken edges more ──
-          float vig = smoothstep(1.25, 0.55, length(vUv - 0.5));
-          col *= mix(0.8, 1.0, vig);
+          // ── EDGE VIGNETTE — smooth cinematic falloff (NOT hard bars).
+          //    Lower the 2nd number (0.72) to darken edges more / raise to flatten.
+          float vig = smoothstep(1.25, 0.5, length(vUv - 0.5));
+          col *= mix(0.72, 1.0, vig);
 
           col *= (1.0 - uFade * 0.85);
           col *= uReady; // fade in once first frame is decoded

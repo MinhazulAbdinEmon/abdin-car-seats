@@ -46,7 +46,7 @@ export default function Intro() {
   useEffect(() => {
     // lightweight path: no WebGL, just a timed CSS reveal
     if (light) {
-      const t = setTimeout(() => setShow(false), 3000);
+      const t = setTimeout(() => setShow(false), 2000); // shorter on mobile
       return () => clearTimeout(t);
     }
 
@@ -257,16 +257,17 @@ export default function Intro() {
     raf = requestAnimationFrame(tick);
 
     // ── GSAP cinematic timeline ────────────────────
+    // Tightened to ~3.5s total. Scale every duration/position up to slow it down.
     const tl = gsap.timeline({ onComplete: () => setShow(false) });
-    tl.to(state, { opacity: 1, duration: 1.1, ease: "power2.out" }, 0.2)
-      .to(state, { reveal: 0.55, duration: 1.7, ease: "power2.inOut" }, 0.9) // gold catches light
-      .to(state, { camZ: 3.4, duration: 3.4, ease: "power2.inOut" }, 0.9) // slow push-in
-      .to(state, { reveal: 1.0, focus: 0.0, duration: 1.7, ease: "power2.inOut" }, 2.3) // chrome + focus
-      .to(state, { sweep: 0.4, duration: 1.5, ease: "power1.inOut" }, 2.7) // light streak across ACS
-      .to(state, { glow: 1, duration: 0.9, ease: "power2.out" }, 3.4)
-      .to(state, { duration: 0.7 }) // hold
-      .to(state, { camZ: 0.4, duration: 1.3, ease: "power2.in" }, ">") // camera "through" the logo
-      .to(state, { opacity: 0, duration: 0.8, ease: "power2.in" }, "<0.5");
+    tl.to(state, { opacity: 1, duration: 0.7, ease: "power2.out" }, 0.1)
+      .to(state, { reveal: 0.55, duration: 1.0, ease: "power2.inOut" }, 0.5) // gold catches light
+      .to(state, { camZ: 3.4, duration: 2.0, ease: "power2.inOut" }, 0.5) // push-in
+      .to(state, { reveal: 1.0, focus: 0.0, duration: 1.0, ease: "power2.inOut" }, 1.3) // chrome + focus
+      .to(state, { sweep: 0.4, duration: 0.9, ease: "power1.inOut" }, 1.5) // light streak
+      .to(state, { glow: 1, duration: 0.6, ease: "power2.out" }, 1.9)
+      .to(state, { duration: 0.3 }) // short hold
+      .to(state, { camZ: 0.4, duration: 0.8, ease: "power2.in" }, ">") // camera "through" the logo
+      .to(state, { opacity: 0, duration: 0.6, ease: "power2.in" }, "<0.3");
 
     return () => {
       disposed = true;
