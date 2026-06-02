@@ -4,10 +4,10 @@ import ScrollVideoHero from "@/components/ScrollVideoHero";
 import Craftsmanship from "@/components/Craftsmanship";
 import BeforeAfter from "@/components/BeforeAfter";
 import Services from "@/components/Services";
-import Gallery from "@/components/Gallery";
+import CraftOrbit from "@/components/CraftOrbit";
 import Testimonials from "@/components/Testimonials";
 import Contact from "@/components/Contact";
-import Footer from "@/components/Footer";
+import { Footer } from "@/components/ui/footer-section";
 import AmbientLights from "@/components/AmbientLights";
 import PathsBackground from "@/components/PathsBackground";
 
@@ -26,7 +26,7 @@ export default function Home() {
         <Craftsmanship />
         <BeforeAfter />
         <Services />
-        <Gallery />
+        <CraftOrbit />
         <Testimonials />
         <Contact />
       </main>
