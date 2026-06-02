@@ -3,8 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { motion, useScroll, useTransform } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { whatsappLink, site } from "@/lib/site";
 import HeroCards from "@/components/HeroCards";
+
+gsap.registerPlugin(ScrollTrigger);
 
 /**
  * Scroll-driven frame animation (kling.ai / Apple-style).
@@ -19,6 +23,7 @@ const IMG_ASPECT = 1280 / 720;
 export default function ScrollVideoHero() {
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
+  const textRef = useRef(null);
   const [pct, setPct] = useState(0);
   const [ready, setReady] = useState(false);
 
@@ -26,9 +31,6 @@ export default function ScrollVideoHero() {
     target: wrapRef,
     offset: ["start start", "end start"],
   });
-  const textOpacity = useTransform(scrollYProgress, [0, 0.4, 0.55], [1, 1, 0]);
-  const textY = useTransform(scrollYProgress, [0, 0.55], [0, -90]);
-  const textScale = useTransform(scrollYProgress, [0, 0.55], [1, 1.1]);
   const hintOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
 
   useEffect(() => {
@@ -92,7 +94,7 @@ export default function ScrollVideoHero() {
       uTime: { value: 0 },
       uImageAspect: { value: IMG_ASPECT },
       uScreenAspect: { value: 1 },
-      uDistort: { value: mobile ? 0.04 : 0.1 },
+      uDistort: { value: mobile ? 0.03 : 0.06 }, // ← curved-glass warp; lower = flatter/cleaner edges
       uFade: { value: 0 },
       uReady: { value: 0 },
       uContain: { value: 0 }, // 1 = fit whole frame (portrait), 0 = cover
@@ -139,13 +141,17 @@ export default function ScrollVideoHero() {
           float streak = smoothstep(0.0, 0.5, sin((vUv.x + vUv.y) * 3.1415 + uTime * 0.25)) * 0.03;
           col += streak * vec3(0.9, 0.8, 0.6);
 
-          float vig = smoothstep(1.2, 0.4, length(vUv - 0.5));
-          col *= mix(0.62, 1.0, vig);
+          // ── EDGE VIGNETTE — lower the 2nd number (0.8) to darken edges more ──
+          float vig = smoothstep(1.25, 0.55, length(vUv - 0.5));
+          col *= mix(0.8, 1.0, vig);
 
           col *= (1.0 - uFade * 0.85);
           col *= uReady; // fade in once first frame is decoded
 
-          gl_FragColor = vec4(col, inside);
+          // Only letterbox-transparent when actually fitting (portrait contain);
+          // landscape "cover" stays fully opaque → no transparent side bars.
+          float a = uContain > 0.01 ? inside : 1.0;
+          gl_FragColor = vec4(col, a);
         }
       `,
     });
@@ -157,9 +163,10 @@ export default function ScrollVideoHero() {
       const w = window.innerWidth, h = window.innerHeight;
       renderer.setSize(w, h, false);
       uniforms.uScreenAspect.value = w / h;
-      // blend toward "contain" on portrait so the whole car stays visible
-      // (1 = full letterbox fit, 0 = fill/crop); 0.8 keeps it large but intact
-      uniforms.uContain.value = w / h < 1.15 ? 0.8 : 0;
+      // FIT MODE: landscape always "cover" (full-bleed width, no side bars);
+      // only true portrait uses "contain" (fits width, letterboxes top/bottom).
+      // ← raise 0.95 toward 1.1 if you want narrow laptops to fit instead of cover.
+      uniforms.uContain.value = w / h < 0.95 ? 1.0 : 0.0;
     };
     resize();
     window.addEventListener("resize", resize);
@@ -220,6 +227,56 @@ export default function ScrollVideoHero() {
     };
   }, []);
 
+  // ── HERO TEXT: load pop-up from the bottom + scroll-driven motion (GSAP) ──
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mobile = window.innerWidth <= 768;
+    const lenis = typeof window !== "undefined" ? window.__lenis : null;
+    if (lenis) lenis.on("scroll", ScrollTrigger.update);
+
+    const ctx = gsap.context(() => {
+      if (reduced) {
+        gsap.set(".hero-reveal", { opacity: 1, y: 0, filter: "blur(0px)" });
+        return;
+      }
+
+      // REVEAL DISTANCE — desktop ~80px, mobile ~40px (keep it calm/premium)
+      const dist = mobile ? 40 : 80;
+
+      // (1) LOAD entrance — each line pops up from the bottom, staggered,
+      //     so the hero is readable immediately (never an empty hero).
+      gsap.from(".hero-reveal", {
+        y: dist,
+        opacity: 0,
+        filter: "blur(8px)",
+        duration: 1.1,
+        ease: "power3.out",
+        stagger: 0.12, // ← STAGGER TIMING between elements
+        delay: 0.15,
+      });
+
+      // (2) SCROLL-DRIVEN — as you scroll the hero, the whole text block
+      //     lifts further and fades out, scrubbed to scroll progress.
+      gsap.to(textRef.current, {
+        y: mobile ? -60 : -110, // upward drift amount
+        opacity: 0,
+        filter: "blur(6px)",
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#top",
+          start: "top top", // ← SCROLL START
+          end: "+=55%",     // ← SCROLL END (longer = slower fade)
+          scrub: 1,
+        },
+      });
+    }, wrapRef);
+
+    return () => {
+      ctx.revert();
+      if (lenis) lenis.off("scroll", ScrollTrigger.update);
+    };
+  }, []);
+
   return (
     <section ref={wrapRef} id="top" className="relative h-[200vh] md:h-[230vh]">
       {/* sticky cinematic stage */}
@@ -227,77 +284,41 @@ export default function ScrollVideoHero() {
         {/* clean gradient background behind the frame plane */}
         <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_50%_15%,#23252b_0%,#121318_45%,#08080a_100%)]" />
 
+        {/* the car visual fills the full width (object-fit: cover via the shader) */}
         <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
 
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/70 via-transparent to-ink" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_45%_at_50%_46%,rgba(0,0,0,0.55),transparent_70%)]" />
-        <div className="pointer-events-none absolute inset-3 rounded-[2rem] border border-white/5 shadow-[inset_0_0_120px_rgba(0,0,0,0.65)]" />
+        {/* OVERLAYS — readability only. Adjust opacities to taste:
+            top/bottom gradient blends nav + scroll area; center scrim sits behind
+            the text; the side gradient only *blends* the edges (no hard bars). */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/55 via-transparent to-ink/90" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(62%_46%_at_50%_48%,rgba(0,0,0,0.42),transparent_72%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink/35 via-transparent to-ink/35" />
 
-        {/* headline */}
-        <motion.div
-          style={{ opacity: textOpacity, y: textY, scale: textScale }}
-          className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center [text-shadow:0_2px_30px_rgba(0,0,0,0.65)]"
+        {/* headline — GSAP reveals each `.hero-reveal` from the bottom */}
+        <div
+          ref={textRef}
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center will-change-transform [text-shadow:0_2px_30px_rgba(0,0,0,0.65)]"
         >
-          {/* eyebrow — pops up from the bottom */}
-          <div className="mb-6 overflow-hidden pb-[0.12em]">
-            <motion.p
-              initial={{ y: "120%" }}
-              animate={{ y: 0 }}
-              transition={{ delay: 0.2, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="eyebrow text-gold-light"
-            >
-              {site.brand} · {site.tagline}
-            </motion.p>
-          </div>
+          <p className="hero-reveal eyebrow mb-6 text-gold-light">
+            {site.brand} · {site.tagline}
+          </p>
 
-          {/* headline — each line rises from behind a clip mask (digitalists-style) */}
-          <h1 className="display max-w-5xl text-[12vw] leading-[0.95] sm:text-[8.5vw] lg:text-[6.4rem]">
-            <span className="block overflow-hidden pb-[0.14em]">
-              <motion.span
-                initial={{ y: "120%" }}
-                animate={{ y: 0 }}
-                transition={{ delay: 0.35, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-                className="block text-chrome-grad"
-              >
-                Luxury Upholstery
-              </motion.span>
-            </span>
-            <span className="block overflow-hidden pb-[0.14em]">
-              <motion.span
-                initial={{ y: "120%" }}
-                animate={{ y: 0 }}
-                transition={{ delay: 0.5, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-                className="block text-gold-grad"
-              >
-                Redefined
-              </motion.span>
-            </span>
+          <h1 className="display max-w-5xl text-[12vw] leading-[0.98] sm:text-[8.5vw] lg:text-[6.4rem]">
+            <span className="hero-reveal block text-chrome-grad">Luxury Upholstery</span>
+            <span className="hero-reveal block text-gold-grad">Redefined</span>
           </h1>
 
-          {/* subtext — pops up from the bottom */}
-          <div className="mt-7 max-w-xl overflow-hidden pb-[0.12em]">
-            <motion.p
-              initial={{ y: "120%" }}
-              animate={{ y: 0 }}
-              transition={{ delay: 0.72, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="text-base text-cream/85 sm:text-lg"
-            >
-              Premium custom interiors crafted for comfort, elegance, and identity.
-            </motion.p>
-          </div>
+          <p className="hero-reveal mt-7 max-w-xl text-base text-cream/85 sm:text-lg">
+            Premium custom interiors crafted for comfort, elegance, and identity.
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 1 }}
-            className="mt-10 flex flex-wrap items-center justify-center gap-4"
-          >
+          <div className="hero-reveal mt-10 flex flex-wrap items-center justify-center gap-4">
             <a href="#gallery" className="btn btn-gold">Explore Designs</a>
             <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
               Contact on WhatsApp
             </a>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* scroll hint */}
         <motion.div
