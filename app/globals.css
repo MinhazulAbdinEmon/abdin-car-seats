@@ -1,0 +1,175 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: "Sora", system-ui, sans-serif;
+  --font-body: "Manrope", system-ui, sans-serif;
+
+  /* shadcn/ui design tokens — mapped to the Abdin dark luxury palette.
+     Single always-dark theme, so dark values live in :root. */
+  --background: 240 11% 4%;
+  --foreground: 41 33% 93%;
+  --card: 228 9% 9%;
+  --card-foreground: 41 33% 93%;
+  --popover: 228 9% 9%;
+  --popover-foreground: 41 33% 93%;
+  --primary: 35 52% 55%;
+  --primary-foreground: 30 60% 8%;
+  --secondary: 223 11% 13%;
+  --secondary-foreground: 41 33% 93%;
+  --muted: 224 9% 16%;
+  --muted-foreground: 40 12% 66%;
+  --accent: 223 11% 16%;
+  --accent-foreground: 41 33% 93%;
+  --destructive: 0 62% 45%;
+  --destructive-foreground: 41 33% 93%;
+  --border: 223 8% 20%;
+  --input: 223 8% 20%;
+  --ring: 35 52% 55%;
+  --radius: 0.75rem;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
+}
+
+body {
+  background-color: #08080a;
+  color: #f3efe6;
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ── Type helpers ─────────────────────────────── */
+.display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+.eyebrow {
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* ── Gold text + chrome text ──────────────────── */
+.text-gold-grad {
+  background: linear-gradient(135deg, #f0d399 0%, #c8964f 45%, #a6772f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-chrome-grad {
+  background: linear-gradient(180deg, #ffffff 0%, #c7ccd3 45%, #8a909a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── Glassmorphism ────────────────────────────── */
+.glass {
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* hairline gold border */
+.hairline {
+  border: 1px solid rgba(200, 150, 79, 0.25);
+}
+
+/* ── Buttons ──────────────────────────────────── */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.95rem 1.8rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s, background 0.4s;
+  will-change: transform;
+}
+.btn:hover {
+  transform: translateY(-2px);
+}
+.btn-gold {
+  background: linear-gradient(135deg, #e8c785 0%, #c8964f 50%, #a6772f 100%);
+  color: #1a1206;
+  box-shadow: 0 10px 30px rgba(200, 150, 79, 0.28);
+}
+.btn-gold:hover {
+  box-shadow: 0 14px 44px rgba(200, 150, 79, 0.45);
+}
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #f3efe6;
+  backdrop-filter: blur(8px);
+}
+.btn-ghost:hover {
+  border-color: rgba(200, 150, 79, 0.55);
+}
+
+/* ── Section spacing ──────────────────────────── */
+.section {
+  position: relative;
+  padding: clamp(5rem, 12vh, 11rem) clamp(1.25rem, 5vw, 6rem);
+}
+
+/* film grain overlay */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 9px; }
+::-webkit-scrollbar-track { background: #0b0b0d; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#c8964f, #6b4527);
+  border-radius: 9px;
+}
+
+/* hide horizontal scrollbar on gallery */
+.no-bar::-webkit-scrollbar { display: none; }
+.no-bar { -ms-overflow-style: none; scrollbar-width: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
