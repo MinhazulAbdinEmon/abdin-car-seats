@@ -64,6 +64,8 @@ export default function BeforeAfter() {
                 src="/images/car-seats.jpg"
                 alt="After — restored luxury interior"
                 className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
                 draggable={false}
               />
               <span className="absolute right-4 top-4 rounded-full bg-ink/60 px-3 py-1 text-xs tracking-wide text-gold-light backdrop-blur">
@@ -80,6 +82,8 @@ export default function BeforeAfter() {
                   alt="Before — worn interior"
                   className="absolute inset-0 h-full w-full object-cover"
                   style={{ filter: "grayscale(0.85) brightness(0.6) contrast(1.1) sepia(0.2)" }}
+                  loading="lazy"
+                  decoding="async"
                   draggable={false}
                 />
                 <span className="absolute left-4 top-4 rounded-full bg-ink/60 px-3 py-1 text-xs tracking-wide text-cream/70 backdrop-blur">

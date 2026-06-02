@@ -25,7 +25,7 @@ export default function Testimonials() {
     <section className="section relative z-10 overflow-hidden bg-ink">
       {/* blurred luxury interior backdrop */}
       <div className="pointer-events-none absolute inset-0">
-        <img src="/images/car-seats.jpg" alt="" className="h-full w-full object-cover opacity-25 blur-2xl scale-110" />
+        <img src="/images/car-seats.jpg" alt="" loading="lazy" decoding="async" className="h-full w-full scale-110 object-cover opacity-25 blur-lg sm:blur-2xl" />
         <div className="absolute inset-0 bg-ink/70" />
       </div>
 

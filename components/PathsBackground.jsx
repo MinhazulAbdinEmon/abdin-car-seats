@@ -48,7 +48,8 @@ export default function PathsBackground({ className = "" }) {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const mobile = window.innerWidth <= 768;
-    setCount(mobile ? 12 : 36);
+    // fewer animated SVG paths = far lighter continuous cost (was 36/12)
+    setCount(mobile ? 8 : 18);
     setLayers(mobile ? 1 : 2);
   }, []);
 

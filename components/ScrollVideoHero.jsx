@@ -263,7 +263,7 @@ export default function ScrollVideoHero() {
       gsap.to(textRef.current, {
         y: mobile ? -60 : -110, // upward drift amount
         opacity: 0,
-        filter: "blur(6px)",
+        // NOTE: transform/opacity only — no filter during scroll (avoids jank)
         ease: "none",
         scrollTrigger: {
           trigger: "#top",

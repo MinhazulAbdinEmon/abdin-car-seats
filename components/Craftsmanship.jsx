@@ -39,6 +39,8 @@ export default function Craftsmanship() {
             <motion.img
               src="/images/car-seats.jpg"
               alt="Macro leather stitching detail"
+              loading="lazy"
+              decoding="async"
               style={{ y: imgY, scale: imgScale }}
               className="h-full w-full object-cover"
             />
