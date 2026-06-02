@@ -1,14 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 /**
  * Brand-tuned take on the Aceternity "floating paths" background — flowing gold
  * filament lines on the dark theme. Drop it as an absolute layer inside any
  * `relative` section. Subtle by design so content stays readable.
+ * Path count is reduced on mobile (and disabled for reduced-motion) for perf.
  */
-function FloatingPaths({ position }) {
-  const paths = Array.from({ length: 36 }, (_, i) => ({
+function FloatingPaths({ position, count }) {
+  const paths = Array.from({ length: count }, (_, i) => ({
     id: i,
     d: `M-${380 - i * 5 * position} -${189 + i * 6}C-${380 - i * 5 * position} -${
       189 + i * 6
@@ -30,16 +32,8 @@ function FloatingPaths({ position }) {
           strokeWidth={path.width}
           strokeOpacity={0.06 + path.id * 0.018}
           initial={{ pathLength: 0.3, opacity: 0.5 }}
-          animate={{
-            pathLength: 1,
-            opacity: [0.2, 0.45, 0.2],
-            pathOffset: [0, 1, 0],
-          }}
-          transition={{
-            duration: 20 + Math.random() * 10,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "linear",
-          }}
+          animate={{ pathLength: 1, opacity: [0.2, 0.45, 0.2], pathOffset: [0, 1, 0] }}
+          transition={{ duration: 20 + Math.random() * 10, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
         />
       ))}
     </svg>
@@ -47,10 +41,23 @@ function FloatingPaths({ position }) {
 }
 
 export default function PathsBackground({ className = "" }) {
+  // 0 = disabled (reduced-motion), else number of paths per layer
+  const [count, setCount] = useState(0);
+  const [layers, setLayers] = useState(1);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const mobile = window.innerWidth <= 768;
+    setCount(mobile ? 12 : 36);
+    setLayers(mobile ? 1 : 2);
+  }, []);
+
+  if (!count) return null;
+
   return (
     <div className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
-      <FloatingPaths position={1} />
-      <FloatingPaths position={-1} />
+      <FloatingPaths position={1} count={count} />
+      {layers > 1 && <FloatingPaths position={-1} count={count} />}
     </div>
   );
 }

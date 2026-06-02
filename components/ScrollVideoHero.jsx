@@ -13,9 +13,7 @@ import { whatsappLink } from "@/lib/site";
  * down and reverse on scroll up. A glass-distortion shader keeps the cinematic
  * automotive-mirror feel.
  */
-const FRAME_COUNT = 192;
 const IMG_ASPECT = 1280 / 720;
-const framePath = (i) => `/frames/frame-${String(i + 1).padStart(4, "0")}.jpg`;
 
 export default function ScrollVideoHero() {
   const wrapRef = useRef(null);
@@ -38,6 +36,13 @@ export default function ScrollVideoHero() {
     if (!canvas || !wrap) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // mobile → lighter frame set (720p / 12fps, ~1.7MB) + contain-fit
+    const mobile = window.innerWidth <= 768;
+    const FRAME_COUNT = mobile ? 96 : 192;
+    const framePath = mobile
+      ? (i) => `/frames-mobile/frame-${String(i + 1).padStart(4, "0")}.jpg`
+      : (i) => `/frames/frame-${String(i + 1).padStart(4, "0")}.jpg`;
 
     // ── preload the frame sequence ──────────────────
     const images = new Array(FRAME_COUNT);
@@ -68,8 +73,8 @@ export default function ScrollVideoHero() {
     }
 
     // ── three.js stage ──────────────────────────────
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: !mobile, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, mobile ? 1.5 : 2));
 
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -86,9 +91,10 @@ export default function ScrollVideoHero() {
       uTime: { value: 0 },
       uImageAspect: { value: IMG_ASPECT },
       uScreenAspect: { value: 1 },
-      uDistort: { value: 0.1 },
+      uDistort: { value: mobile ? 0.04 : 0.1 },
       uFade: { value: 0 },
       uReady: { value: 0 },
+      uContain: { value: 0 }, // 1 = fit whole frame (portrait), 0 = cover
     };
 
     const material = new THREE.ShaderMaterial({
@@ -101,13 +107,20 @@ export default function ScrollVideoHero() {
         precision highp float;
         varying vec2 vUv;
         uniform sampler2D uTexture;
-        uniform float uTime, uImageAspect, uScreenAspect, uDistort, uFade, uReady;
+        uniform float uTime, uImageAspect, uScreenAspect, uDistort, uFade, uReady, uContain;
 
         void main(){
-          vec2 scale = uScreenAspect > uImageAspect
+          vec2 coverScale = uScreenAspect > uImageAspect
             ? vec2(1.0, uImageAspect / uScreenAspect)
             : vec2(uScreenAspect / uImageAspect, 1.0);
+          vec2 containScale = uScreenAspect > uImageAspect
+            ? vec2(uScreenAspect / uImageAspect, 1.0)
+            : vec2(1.0, uImageAspect / uScreenAspect);
+          vec2 scale = mix(coverScale, containScale, uContain);
           vec2 uv = (vUv - 0.5) * scale + 0.5;
+
+          // letterbox transparency when fitting (lets the gradient show)
+          float inside = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
 
           vec2 c = uv - 0.5;
           float d = dot(c, c);
@@ -131,7 +144,7 @@ export default function ScrollVideoHero() {
           col *= (1.0 - uFade * 0.85);
           col *= uReady; // fade in once first frame is decoded
 
-          gl_FragColor = vec4(col, 1.0);
+          gl_FragColor = vec4(col, inside);
         }
       `,
     });
@@ -143,9 +156,17 @@ export default function ScrollVideoHero() {
       const w = window.innerWidth, h = window.innerHeight;
       renderer.setSize(w, h, false);
       uniforms.uScreenAspect.value = w / h;
+      // blend toward "contain" on portrait so the whole car stays visible
+      // (1 = full letterbox fit, 0 = fill/crop); 0.8 keeps it large but intact
+      uniforms.uContain.value = w / h < 1.15 ? 0.8 : 0;
     };
     resize();
     window.addEventListener("resize", resize);
+
+    // pause rendering whenever the hero is scrolled out of view (saves CPU/GPU)
+    let visible = true;
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0 });
+    io.observe(wrap);
 
     // ── scrub loop ──────────────────────────────────
     let raf;
@@ -155,6 +176,7 @@ export default function ScrollVideoHero() {
     const clock = new THREE.Clock();
 
     const tick = () => {
+      if (!visible) { raf = requestAnimationFrame(tick); return; }
       uniforms.uTime.value = clock.getElapsedTime();
 
       const rect = wrap.getBoundingClientRect();
@@ -187,6 +209,7 @@ export default function ScrollVideoHero() {
 
     return () => {
       cancelAnimationFrame(raf);
+      io.disconnect();
       window.removeEventListener("resize", resize);
       for (const im of images) { if (im) im.onload = null; }
       texture.dispose();

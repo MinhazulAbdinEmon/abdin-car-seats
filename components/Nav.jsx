@@ -34,6 +34,7 @@ export default function Nav() {
   };
 
   return (
+    <>
     <motion.header
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
@@ -101,5 +102,16 @@ export default function Nav() {
         </div>
       </motion.div>
     </motion.header>
+
+    {/* floating WhatsApp button — always visible on mobile */}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.6 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 1.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed bottom-5 right-5 z-[70] md:hidden"
+    >
+      <WhatsAppGlowButton compact />
+    </motion.div>
+    </>
   );
 }

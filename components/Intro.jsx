@@ -15,9 +15,27 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
  * gold catches light first → chrome reveals → blur-to-focus → light streak →
  * camera push-in → camera "through" the logo → seamless fade into the hero.
  */
+const logoMask = {
+  WebkitMaskImage: "url(/images/logo.png)",
+  maskImage: "url(/images/logo.png)",
+  WebkitMaskSize: "contain",
+  maskSize: "contain",
+  WebkitMaskRepeat: "no-repeat",
+  maskRepeat: "no-repeat",
+  WebkitMaskPosition: "center",
+  maskPosition: "center",
+};
+
 export default function Intro() {
   const [show, setShow] = useState(true);
   const canvasRef = useRef(null);
+  // mobile / reduced-motion → lightweight CSS reveal instead of WebGL+bloom
+  const [light] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      (window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        window.innerWidth <= 768)
+  );
 
   // lock scroll while the intro plays
   useEffect(() => {
@@ -26,11 +44,9 @@ export default function Intro() {
   }, [show]);
 
   useEffect(() => {
-    const reduced =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      const t = setTimeout(() => setShow(false), 1600);
+    // lightweight path: no WebGL, just a timed CSS reveal
+    if (light) {
+      const t = setTimeout(() => setShow(false), 3000);
       return () => clearTimeout(t);
     }
 
@@ -292,8 +308,28 @@ export default function Intro() {
             transition={{ duration: 3.2, ease: "easeInOut", delay: 0.4 }}
           />
 
-          {/* three.js stage */}
-          <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+          {/* three.js stage (desktop) */}
+          {!light && <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />}
+
+          {/* lightweight logo reveal (mobile / reduced-motion) */}
+          {light && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
+              <motion.div
+                initial={{ opacity: 0, scale: 1.15, filter: "blur(22px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                className="relative h-40 w-40"
+              >
+                <span className="absolute inset-0 -z-10 scale-125 rounded-full bg-[radial-gradient(circle,rgba(120,180,235,0.5),transparent_70%)] blur-xl" />
+                <img src="/images/logo.png" alt="Abdin Auto Seats Upholstery" className="h-full w-full object-contain" />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 animate-[shimmer2_3s_infinite_linear] bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,0.6)_50%,rgba(170,215,255,0.5)_55%,transparent_70%)] [background-size:200%_100%]"
+                  style={logoMask}
+                />
+              </motion.div>
+            </div>
+          )}
 
           {/* reflective floor sheen */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-[linear-gradient(to_top,rgba(200,150,79,0.05),transparent)]" />
