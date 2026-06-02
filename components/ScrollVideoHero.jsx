@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { whatsappLink } from "@/lib/site";
+import { whatsappLink, site } from "@/lib/site";
+import HeroCards from "@/components/HeroCards";
 
 /**
  * Scroll-driven frame animation (kling.ai / Apple-style).
@@ -220,7 +221,7 @@ export default function ScrollVideoHero() {
   }, []);
 
   return (
-    <section ref={wrapRef} id="top" className="relative h-[180vh]">
+    <section ref={wrapRef} id="top" className="relative h-[230vh]">
       {/* sticky cinematic stage */}
       <div className="sticky top-0 h-screen w-full overflow-hidden">
         {/* clean gradient background behind the frame plane */}
@@ -243,7 +244,7 @@ export default function ScrollVideoHero() {
             transition={{ delay: 0.4, duration: 0.9 }}
             className="eyebrow mb-6 text-gold-light"
           >
-            Abdin Car Seats · Upholstery &amp; Covers
+            {site.brand} · {site.tagline}
           </motion.p>
 
           <motion.h1
@@ -297,6 +298,9 @@ export default function ScrollVideoHero() {
             loading footage… {pct}%
           </div>
         )}
+
+        {/* digitalists-style content cards that rise from the bottom on scroll */}
+        <HeroCards />
       </div>
     </section>
   );

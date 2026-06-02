@@ -2,7 +2,6 @@ import Intro from "@/components/Intro";
 import Nav from "@/components/Nav";
 import ScrollVideoHero from "@/components/ScrollVideoHero";
 import Craftsmanship from "@/components/Craftsmanship";
-import ProductScroll from "@/components/ProductScroll";
 import BeforeAfter from "@/components/BeforeAfter";
 import Services from "@/components/Services";
 import Gallery from "@/components/Gallery";
@@ -25,7 +24,6 @@ export default function Home() {
         </div>
         <ScrollVideoHero />
         <Craftsmanship />
-        <ProductScroll />
         <BeforeAfter />
         <Services />
         <Gallery />
