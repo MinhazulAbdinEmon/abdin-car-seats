@@ -1,107 +1,64 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Warp } from "@paper-design/shaders-react";
-import { Sparkles, Layers, Ruler, Award, Armchair, ShieldCheck } from "lucide-react";
+import Reveal from "./Reveal";
 
 /**
- * Feature highlights on animated brand-gold shader backgrounds.
- * Replaces the photo gallery (whose source images were too low-res to show large).
- * Edit `features` for content. Shaders pause on mobile / reduced-motion for perf.
+ * Feature / work gallery using the real uploaded photos.
+ * Displayed at card size (~400–560px) so the source images (679–980px) stay
+ * CRISP — the earlier blur came from stretching them full-screen.
+ * Edit the `work` array to change images/captions.
  */
-const features = [
-  {
-    title: "Handcrafted Precision",
-    description: "Every panel cut, shaped and stitched by hand — millimetre-accurate seams that hold for years.",
-    Icon: Sparkles,
-    colors: ["hsl(34,55%,14%)", "hsl(40,72%,48%)", "hsl(26,45%,9%)", "hsl(44,78%,58%)"],
-  },
-  {
-    title: "Premium Materials",
-    description: "Full-grain leather, Alcantara and breathable foams chosen for touch, durability and quality.",
-    Icon: Layers,
-    colors: ["hsl(28,40%,12%)", "hsl(36,60%,40%)", "hsl(22,35%,8%)", "hsl(40,70%,52%)"],
-  },
-  {
-    title: "Bespoke Design",
-    description: "Diamond quilting, contrast piping, embroidered logos — configured entirely to your identity.",
-    Icon: Ruler,
-    colors: ["hsl(38,55%,15%)", "hsl(44,75%,50%)", "hsl(30,45%,10%)", "hsl(46,80%,60%)"],
-  },
-  {
-    title: "Showroom Finish",
-    description: "UV-stable, wear-resistant finishes detailed, sealed and delivered better than factory.",
-    Icon: Award,
-    colors: ["hsl(30,45%,12%)", "hsl(38,68%,44%)", "hsl(24,40%,8%)", "hsl(42,74%,55%)"],
-  },
-  {
-    title: "Beyond Cars",
-    description: "The same craft applied to sofas, lounge furniture and bespoke padded headboards.",
-    Icon: Armchair,
-    colors: ["hsl(35,50%,14%)", "hsl(41,70%,46%)", "hsl(28,42%,9%)", "hsl(45,76%,57%)"],
-  },
-  {
-    title: "Trusted Craftsmanship",
-    description: "Drivers who notice the difference return — interiors built to be felt, not just seen.",
-    Icon: ShieldCheck,
-    colors: ["hsl(32,48%,13%)", "hsl(39,66%,42%)", "hsl(25,40%,8%)", "hsl(43,72%,54%)"],
-  },
+const work = [
+  { img: "/images/car-seats.jpg", t: "Bespoke Car Seats", k: "Diamond-stitched leather & Alcantara" },
+  { img: "/images/sofa.jpg", t: "Furniture Reupholstery", k: "Sofas & lounge, reborn" },
+  { img: "/images/bed.jpg", t: "Padded Headboards", k: "Bespoke bedroom pieces" },
+  { img: "/images/intro.jpg", t: "Signature Detailing", k: "Showroom-grade finish" },
 ];
 
 export default function CraftFeatures() {
-  // 0 = static (mobile / reduced-motion), else animation speed
-  const [speed, setSpeed] = useState(0);
-
-  useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const mobile = window.innerWidth <= 768;
-    setSpeed(reduced || mobile ? 0 : 0.5); // ← shader animation speed
-  }, []);
-
   return (
     <section id="gallery" className="section relative z-10 bg-ink/40">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-14 text-center">
-          <p className="eyebrow text-gold/70">Why Abdin</p>
+      <div className="mx-auto max-w-6xl">
+        <Reveal className="mb-12 text-center">
+          <p className="eyebrow text-gold/70">Our Work</p>
           <h2 className="display mx-auto mt-3 max-w-2xl text-4xl sm:text-5xl">
-            Crafted to a higher <span className="text-gold-grad">standard</span>
+            Crafted, <span className="text-gold-grad">in every detail</span>
           </h2>
-        </div>
+        </Reveal>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {features.map(({ title, description, Icon, colors }, i) => (
-            <div key={i} className="relative h-72">
-              <div className="absolute inset-0 overflow-hidden rounded-3xl">
-                <Warp
-                  style={{ height: "100%", width: "100%" }}
-                  proportion={0.4}
-                  softness={1.0}
-                  distortion={0.16}
-                  swirl={0.7}
-                  swirlIterations={9}
-                  shape="checks"
-                  shapeScale={0.1}
-                  scale={1}
-                  rotation={0}
-                  speed={speed}
-                  colors={colors}
-                />
-              </div>
-
-              <div className="relative z-10 flex h-full flex-col rounded-3xl border border-white/10 bg-ink/75 p-8 backdrop-blur-[2px] transition-transform duration-500 hover:-translate-y-1">
-                <Icon className="h-10 w-10 text-gold-light drop-shadow" strokeWidth={1.3} />
-                <h3 className="display mt-6 text-xl text-cream">{title}</h3>
-                <p className="mt-3 flex-grow text-sm text-cream/65">{description}</p>
-                <div className="mt-6 flex items-center gap-2 text-sm text-gold-light/80">
-                  <span>Crafted detail</span>
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {work.map((w, i) => (
+            <Reveal key={i} delay={(i % 2) * 0.08}>
+              <article className="group relative overflow-hidden rounded-3xl hairline">
+                {/* aspect keeps images downscaled (crisp); object-position centers the subject */}
+                <div className="aspect-[4/3] w-full overflow-hidden">
+                  <img
+                    src={w.img}
+                    alt={w.t}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover object-center transition-transform duration-[1.1s] ease-out group-hover:scale-[1.04]"
+                  />
                 </div>
-              </div>
-            </div>
+                {/* legibility gradient + hover gold glow */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/10 to-transparent" />
+                <div className="pointer-events-none absolute inset-0 opacity-0 shadow-[inset_0_0_120px_rgba(200,150,79,0.28)] transition-opacity duration-500 group-hover:opacity-100" />
+
+                <div className="absolute bottom-6 left-6 right-6">
+                  <p className="eyebrow text-gold-light/80">{String(i + 1).padStart(2, "0")}</p>
+                  <h3 className="display mt-2 text-2xl text-cream">{w.t}</h3>
+                  <p className="mt-1 text-sm text-cream/65">{w.k}</p>
+                </div>
+              </article>
+            </Reveal>
           ))}
         </div>
+
+        <Reveal delay={0.15}>
+          <p className="mt-8 text-center text-xs text-cream/40">
+            Tip: replace these with 1600px+ photos for full-bleed sharpness.
+          </p>
+        </Reveal>
       </div>
     </section>
   );

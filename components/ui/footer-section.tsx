@@ -64,7 +64,7 @@ export function Footer() {
 			<div className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-5 md:gap-8">
 				<AnimatedContainer className="col-span-2 space-y-4 md:col-span-1">
 					<div className="flex items-center gap-3">
-						<img src="/images/logo.png" alt={site.brand} className="size-10 object-contain" />
+						<img src="/images/logo.png" alt={site.brand} className="h-10 w-10 shrink-0 object-contain" />
 						<span className="display text-sm leading-tight text-foreground">{site.brand}</span>
 					</div>
 					<p className="text-muted-foreground text-sm">
@@ -84,7 +84,7 @@ export function Footer() {
 										rel={link.href.startsWith('#') ? undefined : 'noopener noreferrer'}
 										className="hover:text-foreground inline-flex items-center transition-all duration-300"
 									>
-										{link.icon && <link.icon className="me-1.5 size-4" />}
+										{link.icon && <link.icon className="me-1.5 h-4 w-4" />}
 										{link.title}
 									</a>
 								</li>
